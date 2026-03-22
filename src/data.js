@@ -57,8 +57,6 @@ export const ABOUT_TAGS = [
 
 export const CONFIG = {
   mediumUsername: 'rynqrka',
-  telegramBotToken: 'YOUR_BOT_TOKEN',
-  telegramChatId: 'YOUR_CHAT_ID',
 }
 
 

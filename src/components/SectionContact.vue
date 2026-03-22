@@ -54,12 +54,11 @@ async function send() {
     status.value = { type: 'err', text: 'Please enter a valid email.' }; return
   }
   sending.value = true
-  const text = `📬 New message from your site\n\n👤 ${form.name}\n📧 ${form.email}\n\n💬 ${form.message}`
   try {
-    const res  = await fetch(`https://api.telegram.org/bot${CONFIG.telegramBotToken}/sendMessage`, {
+    const res  = await fetch('/api/contact', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: CONFIG.telegramChatId, text })
+      body: JSON.stringify({ name: form.name, email: form.email, message: form.message })
     })
     const data = await res.json()
     if (data.ok) {
