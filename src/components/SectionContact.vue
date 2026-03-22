@@ -1,0 +1,171 @@
+<template>
+  <section class="panel">
+    <div class="inner">
+
+      <header class="panel-header" :class="{ in: active }">
+        <span class="mono-label">05 / contact</span>
+        <h2 class="panel-title">hit me up</h2>
+      </header>
+
+      <form class="form" :class="{ in: active }" @submit.prevent="send">
+        <div class="form-row">
+          <label for="cf-name">Name</label>
+          <input id="cf-name" v-model="form.name" type="text" placeholder="Your name" autocomplete="off" />
+        </div>
+        <div class="form-row">
+          <label for="cf-email">Email</label>
+          <input id="cf-email" v-model="form.email" type="email" placeholder="your@email.com" autocomplete="off" />
+        </div>
+        <div class="form-row">
+          <label for="cf-msg">Message</label>
+          <textarea id="cf-msg" v-model="form.message" placeholder="What's on your mind?" rows="4"></textarea>
+        </div>
+
+        <button type="submit" class="btn-send" :disabled="sending">
+          <span v-if="!sending">Send Message</span>
+          <span v-else class="dots"><span/><span/><span/></span>
+        </button>
+
+        <div v-if="status" :class="['status-msg', status.type]">
+          {{ status.text }}
+        </div>
+      </form>
+
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { ref, reactive } from 'vue'
+import { CONFIG } from '../data.js'
+
+defineProps({ active: Boolean })
+
+const form    = reactive({ name: '', email: '', message: '' })
+const sending = ref(false)
+const status  = ref(null)
+
+async function send() {
+  status.value = null
+  if (!form.name || !form.email || !form.message) {
+    status.value = { type: 'err', text: 'Please fill in all fields.' }; return
+  }
+  if (!form.email.includes('@')) {
+    status.value = { type: 'err', text: 'Please enter a valid email.' }; return
+  }
+  sending.value = true
+  const text = `📬 New message from your site\n\n👤 ${form.name}\n📧 ${form.email}\n\n💬 ${form.message}`
+  try {
+    const res  = await fetch(`https://api.telegram.org/bot${CONFIG.telegramBotToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: CONFIG.telegramChatId, text })
+    })
+    const data = await res.json()
+    if (data.ok) {
+      status.value = { type: 'ok', text: "Sent! I'll get back to you." }
+      Object.assign(form, { name: '', email: '', message: '' })
+    } else throw new Error()
+  } catch {
+    status.value = { type: 'err', text: 'Something went wrong. Try reaching me on Telegram directly.' }
+  }
+  sending.value = false
+}
+</script>
+
+<style scoped>
+.panel {
+  width: 100vw; height: 100dvh; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+
+.inner {
+  width: 100%;
+  max-width: min(600px, 95vw);
+  padding: clamp(24px, 5vh, 56px) clamp(20px, 5vw, 64px);
+  display: flex; flex-direction: column;
+  gap: clamp(20px, 3.5vh, 32px);
+}
+
+.panel-header {
+  opacity: 0; transform: translateY(16px);
+  transition: opacity .55s, transform .55s cubic-bezier(.22,1,.36,1);
+}
+.panel-header.in { opacity: 1; transform: none; }
+
+.mono-label {
+  font-family: var(--mono);
+  font-size: clamp(.56rem, 1.1vw, .63rem);
+  letter-spacing: .18em; text-transform: uppercase;
+  color: var(--faint); display: block; margin-bottom: 7px;
+}
+.panel-title {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+  letter-spacing: -.035em; color: #fff; line-height: 1;
+}
+
+.form {
+  display: flex; flex-direction: column;
+  gap: clamp(12px, 2vh, 16px);
+  opacity: 0; transform: translateY(14px);
+  transition: opacity .55s .14s, transform .55s .14s cubic-bezier(.22,1,.36,1);
+}
+.form.in { opacity: 1; transform: none; }
+
+.form-row { display: flex; flex-direction: column; gap: 6px; }
+.form-row label {
+  font-family: var(--mono);
+  font-size: clamp(.54rem, 1vw, .6rem);
+  letter-spacing: .15em; text-transform: uppercase;
+  color: var(--faint);
+}
+.form-row input,
+.form-row textarea {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: clamp(9px, 1.5vh, 12px) 14px;
+  color: var(--text);
+  font-size: clamp(.82rem, 1.6vw, .9rem);
+  outline: none; resize: none;
+  transition: border-color .18s;
+  width: 100%;
+}
+.form-row input::placeholder,
+.form-row textarea::placeholder { color: rgba(255,255,255,.14); }
+.form-row input:focus,
+.form-row textarea:focus { border-color: rgba(255,255,255,.2); }
+
+.btn-send {
+  background: #fff; color: #09090c;
+  border-radius: 10px;
+  padding: clamp(10px, 1.8vh, 13px) 20px;
+  font-size: clamp(.84rem, 1.6vw, .9rem); font-weight: 600;
+  width: 100%;
+  transition: background .18s, transform .15s;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 44px;
+}
+.btn-send:hover:not(:disabled) { background: #e8e8e8; transform: translateY(-1px); }
+.btn-send:disabled { opacity: .45; cursor: not-allowed; }
+
+.dots { display: flex; gap: 4px; align-items: center; }
+.dots span {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--bg); animation: bounce 1.2s infinite;
+}
+.dots span:nth-child(2) { animation-delay: .2s; }
+.dots span:nth-child(3) { animation-delay: .4s; }
+@keyframes bounce { 0%,60%,100%{transform:none} 30%{transform:translateY(-4px)} }
+
+.status-msg {
+  font-family: var(--mono);
+  font-size: clamp(.58rem, 1.1vw, .65rem);
+  letter-spacing: .05em; text-align: center;
+  padding: 10px 14px; border-radius: 8px;
+}
+.status-msg.ok  { background: rgba(34,197,94,.07);  color: rgba(34,197,94,.8);  border: 1px solid rgba(34,197,94,.13); }
+.status-msg.err { background: rgba(239,68,68,.06);  color: rgba(239,68,68,.7);  border: 1px solid rgba(239,68,68,.12); }
+</style>
