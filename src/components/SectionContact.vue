@@ -167,4 +167,27 @@ async function send() {
 }
 .status-msg.ok  { background: rgba(34,197,94,.07);  color: rgba(34,197,94,.8);  border: 1px solid rgba(34,197,94,.13); }
 .status-msg.err { background: rgba(239,68,68,.06);  color: rgba(239,68,68,.7);  border: 1px solid rgba(239,68,68,.12); }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .panel {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: flex-start;
+  }
+  .inner {
+    padding: 16px;
+    gap: clamp(14px, 2.5vh, 22px);
+    min-height: 100dvh;
+    justify-content: flex-start;
+    padding-top: clamp(48px, 8vh, 64px);
+    padding-bottom: clamp(32px, 5vh, 48px);
+  }
+  .form { gap: 10px; }
+  .form-row input,
+  .form-row textarea { padding: 9px 12px; font-size: .84rem; }
+  .btn-send { padding: 10px 16px; }
+}
 </style>

@@ -164,4 +164,26 @@ defineEmits(['go'])
   85%  { opacity: 1; }
   100% { top: 32px; opacity: 0; }
 }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .panel {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .home-inner {
+    padding: clamp(24px, 4vh, 40px) 20px;
+    min-height: 100dvh;
+    justify-content: center;
+  }
+  .avatar-wrap { margin-bottom: 16px; }
+  .avatar { width: 56px; height: 56px; border-radius: 14px; font-size: 1.3rem; }
+  .mono-handle { margin-bottom: 6px; }
+  .hero-name { margin-bottom: 12px; }
+  .hero-bio { margin-bottom: 20px; }
+  .cta-row { margin-bottom: 32px; gap: 8px; }
+  .scroll-hint { display: none; }
+}
 </style>

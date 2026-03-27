@@ -181,4 +181,34 @@ const darkBrand = new Set(['x', 'tiktok', 'threads', 'steam', '9gag', 'motherles
   max-width: 100%;
 }
 .card:hover .card-label { color: rgba(255,255,255,.44); }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .panel {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: flex-start;
+  }
+  .inner {
+    padding: 16px;
+    gap: clamp(10px, 2vh, 16px);
+    min-height: 100dvh;
+    justify-content: flex-start;
+    padding-top: clamp(48px, 8vh, 64px);
+    padding-bottom: clamp(32px, 5vh, 48px);
+  }
+  .all-groups { gap: clamp(10px, 1.5vh, 14px); }
+  .group-label { margin-bottom: 5px; }
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+    gap: 4px;
+  }
+  .card {
+    border-radius: 8px;
+  }
+  .card-logo { width: 16px; height: 16px; }
+  .card-label { font-size: .44rem; padding: 0 2px; }
+}
 </style>

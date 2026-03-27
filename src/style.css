@@ -1,37 +1,37 @@
 /* ── Self-hosted fonts ── */
 @font-face {
   font-family: 'Syne';
-  src: url('/public/fonts/syne-v24-greek_latin_latin-ext-700.woff2') format('woff2');
+  src: url('/fonts/syne-v24-greek_latin_latin-ext-700.woff2') format('woff2');
   font-weight: 700; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: 'Syne';
-  src: url('/public/fonts/syne-v24-greek_latin_latin-ext-800.woff2') format('woff2');
+  src: url('/fonts/syne-v24-greek_latin_latin-ext-800.woff2') format('woff2');
   font-weight: 800; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: 'DM Sans';
-  src: url('/public/fonts/dm-sans-v17-latin_latin-ext-300.woff2') format('woff2');
+  src: url('/fonts/dm-sans-v17-latin_latin-ext-300.woff2') format('woff2');
   font-weight: 300; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: 'DM Sans';
-  src: url('/public/fonts/dm-sans-v17-latin_latin-ext-regular.woff2') format('woff2');
+  src: url('/fonts/dm-sans-v17-latin_latin-ext-regular.woff2') format('woff2');
   font-weight: 400; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: 'DM Sans';
-  src: url('/public/fonts/dm-sans-v17-latin_latin-ext-500.woff2') format('woff2');
+  src: url('/fonts/dm-sans-v17-latin_latin-ext-500.woff2') format('woff2');
   font-weight: 500; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: 'Geist Mono';
-  src: url('/public/fonts/geist-mono-v4-latin-regular.woff2') format('woff2');
+  src: url('/fonts/geist-mono-v4-latin-regular.woff2') format('woff2');
   font-weight: 400; font-style: normal; font-display: swap;
 }
 @font-face {
   font-family: 'Geist Mono';
-  src: url('/public/fonts/geist-mono-v4-latin-500.woff2') format('woff2');
+  src: url('/fonts/geist-mono-v4-latin-500.woff2') format('woff2');
   font-weight: 500; font-style: normal; font-display: swap;
 }
 

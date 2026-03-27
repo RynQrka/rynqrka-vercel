@@ -4,6 +4,7 @@
     ref="shell"
     @wheel.prevent="onWheel"
     @touchstart.passive="onTouchStart"
+    @touchmove.passive="onTouchMove"
     @touchend.passive="onTouchEnd"
   >
     <!-- Subtle radial spotlight that follows sections -->
@@ -78,6 +79,9 @@ import SectionContact from './components/SectionContact.vue'
 const panels  = ref(null)
 const current = ref(0)
 const locked  = ref(false)
+const isMobile = ref(false)
+
+function checkMobile() { isMobile.value = window.innerWidth <= 640 }
 
 const progressPct = computed(() =>
   `${(current.value / (SECTIONS.length - 1)) * 100}%`
@@ -89,13 +93,39 @@ const spotlightStyle  = computed(() => ({
   background: `radial-gradient(ellipse 70% 70% at 50% 50%, ${spotlightColors[current.value]}, transparent 70%)`,
 }))
 
+// Get the current panel element
+function getCurrentPanel() {
+  return panels.value?.children?.[current.value] || null
+}
+
+// Check if a panel has overflowing content
+function panelHasOverflow(panel) {
+  if (!panel) return false
+  return panel.scrollHeight > panel.clientHeight + 5
+}
+
 function goTo(idx) {
   if (locked.value) return
   const target = Math.max(0, Math.min(SECTIONS.length - 1, idx))
   if (target === current.value) return
   locked.value = true
   current.value = target
-  panels.value.style.transform = `translateY(-${target * 100}vh)`
+
+  // Calculate offset: on mobile, use actual panel positions for accuracy
+  if (isMobile.value && panels.value) {
+    let offset = 0
+    for (let i = 0; i < target; i++) {
+      offset += panels.value.children[i]?.offsetHeight || window.innerHeight
+    }
+    panels.value.style.transform = `translateY(-${offset}px)`
+  } else {
+    panels.value.style.transform = `translateY(-${target * 100}vh)`
+  }
+
+  // Reset the target panel's scroll to top when navigating to it
+  const targetPanel = panels.value?.children?.[target]
+  if (targetPanel) targetPanel.scrollTop = 0
+
   setTimeout(() => { locked.value = false }, 900)
 }
 
@@ -110,12 +140,50 @@ function onWheel(e) {
   if (wheelAcc < -60) { wheelAcc = 0; goTo(current.value - 1) }
 }
 
-// Touch
+// Touch — scroll-boundary-aware on mobile
 let touchY = 0
-function onTouchStart(e) { touchY = e.touches[0].clientY }
+let touchStartScrollTop = 0
+let touchDidScroll = false
+
+function onTouchStart(e) {
+  touchY = e.touches[0].clientY
+  touchDidScroll = false
+  const panel = getCurrentPanel()
+  touchStartScrollTop = panel ? panel.scrollTop : 0
+}
+
+function onTouchMove() {
+  // Track if internal scrolling occurred
+  const panel = getCurrentPanel()
+  if (panel && Math.abs(panel.scrollTop - touchStartScrollTop) > 3) {
+    touchDidScroll = true
+  }
+}
+
 function onTouchEnd(e) {
   const diff = touchY - e.changedTouches[0].clientY
-  if (Math.abs(diff) > 50) goTo(current.value + (diff > 0 ? 1 : -1))
+  if (Math.abs(diff) < 50) return
+
+  const panel = getCurrentPanel()
+
+  // On mobile, check scroll boundaries before navigating
+  if (isMobile.value && panel && panelHasOverflow(panel)) {
+    // If internal scroll happened, skip navigation
+    if (touchDidScroll) return
+
+    if (diff > 0) {
+      // Swiping up — only navigate if scrolled to bottom
+      const atBottom = panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 8
+      if (atBottom) goTo(current.value + 1)
+    } else {
+      // Swiping down — only navigate if scrolled to top
+      const atTop = panel.scrollTop <= 8
+      if (atTop) goTo(current.value - 1)
+    }
+  } else {
+    // No overflow or desktop — normal behavior
+    goTo(current.value + (diff > 0 ? 1 : -1))
+  }
 }
 
 // Keyboard
@@ -127,8 +195,13 @@ function onKey(e) {
 onMounted(() => {
   panels.value.style.transition = 'transform 0.88s cubic-bezier(0.76, 0, 0.24, 1)'
   window.addEventListener('keydown', onKey)
+  window.addEventListener('resize', checkMobile)
+  checkMobile()
 })
-onUnmounted(() => window.removeEventListener('keydown', onKey))
+onUnmounted(() => {
+  window.removeEventListener('keydown', onKey)
+  window.removeEventListener('resize', checkMobile)
+})
 </script>
 
 <style scoped>
@@ -216,5 +289,6 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 /* Mobile: hide arrows */
 @media (max-width: 640px) {
   .arrow { display: none; }
+  .panels { height: auto; }
 }
 </style>

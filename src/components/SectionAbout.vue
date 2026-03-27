@@ -132,4 +132,28 @@ const stats = []
   letter-spacing: .14em; text-transform: uppercase;
   color: var(--faint);
 }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .panel {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: flex-start;
+  }
+  .inner {
+    padding: 16px;
+    gap: clamp(16px, 2.5vh, 22px);
+    min-height: 100dvh;
+    justify-content: flex-start;
+    padding-top: clamp(48px, 8vh, 64px);
+    padding-bottom: clamp(32px, 5vh, 48px);
+  }
+  .about-text { gap: 8px; }
+  .about-text p { font-size: .82rem; line-height: 1.6; }
+  .tags { gap: 4px; }
+  .tag { padding: 4px 9px; font-size: .52rem; }
+  .stats-row { padding-top: 12px; gap: 20px; }
+}
 </style>

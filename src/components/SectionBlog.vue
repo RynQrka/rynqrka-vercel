@@ -213,4 +213,27 @@ function readTime(html) {
   transition: color .18s;
 }
 .view-all:hover span { color: var(--muted); }
+
+/* Mobile */
+@media (max-width: 640px) {
+  .panel {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    align-items: flex-start;
+  }
+  .inner {
+    padding: 16px;
+    gap: clamp(12px, 2vh, 18px);
+    min-height: 100dvh;
+    justify-content: flex-start;
+    padding-top: clamp(48px, 8vh, 64px);
+    padding-bottom: clamp(32px, 5vh, 48px);
+  }
+  .post { padding: clamp(8px, 1.2vh, 11px) 0; gap: 8px; }
+  .post-num { width: 18px; }
+  .post-title { font-size: .78rem; }
+  .post-meta { font-size: .5rem; }
+}
 </style>
