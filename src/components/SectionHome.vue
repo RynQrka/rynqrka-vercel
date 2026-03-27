@@ -16,9 +16,9 @@
       </p>
 
       <div class="cta-row" :class="{ in: active }">
-        <button class="btn-primary" @click="$emit('go', 1)">socials</button>
-        <button class="btn-ghost"   @click="$emit('go', 3)">about</button>
-        <button class="btn-ghost"   @click="$emit('go', 4)">contact</button>
+        <button class="btn-primary magnetic" @click="$emit('go', 1)">socials</button>
+        <button class="btn-ghost magnetic"   @click="$emit('go', 4)">about</button>
+        <button class="btn-ghost magnetic"   @click="$emit('go', 5)">contact</button>
       </div>
 
       <div class="scroll-hint" :class="{ in: active }">

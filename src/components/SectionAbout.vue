@@ -3,7 +3,6 @@
     <div class="inner">
 
       <header class="panel-header" :class="{ in: active }">
-        <span class="mono-label">04 / about</span>
         <h2 class="panel-title">Just me tbh</h2>
       </header>
 
@@ -27,10 +26,21 @@
         </div>
       </div>
 
-      <div class="stats-row" :class="{ in: active }">
-        <div v-for="stat in stats" :key="stat.label" class="stat">
-          <span class="stat-val">{{ stat.val }}</span>
-          <span class="stat-label">{{ stat.label }}</span>
+      <!-- Spotify Widget -->
+      <div v-if="song" class="spotify-widget" :class="{ in: active }">
+        <span class="section-sub">currently listening</span>
+        <a v-if="song.isPlaying" :href="song.songUrl" target="_blank" rel="noopener noreferrer" class="playing-card">
+          <img :src="song.albumImageUrl" class="album-art" alt="Album Cover" />
+          <div class="song-info">
+            <div class="song-title">{{ song.title }}</div>
+            <div class="song-artist">{{ song.artist }}</div>
+          </div>
+          <div class="playing-bars">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </div>
+        </a>
+        <div v-else class="not-playing">
+          <span>Not playing anything online right now.</span>
         </div>
       </div>
 
@@ -39,9 +49,22 @@
 </template>
 
 <script setup>
+import { ref, watch } from 'vue'
 import { ABOUT_TAGS } from '../data.js'
-defineProps({ active: Boolean })
-const stats = []
+
+const props = defineProps({ active: Boolean })
+const song = ref(null)
+let fetchedSong = false
+
+watch(() => props.active, (val) => {
+  if (val && !fetchedSong) {
+    fetchedSong = true
+    fetch('/api/spotify')
+      .then(res => res.json())
+      .then(data => { song.value = data })
+      .catch(() => { song.value = { isPlaying: false } })
+  }
+})
 </script>
 
 <style scoped>
@@ -112,25 +135,65 @@ const stats = []
 }
 .tag.in { opacity: 1; transform: none; }
 
-.stats-row {
-  display: flex; gap: clamp(24px, 5vw, 56px);
+/* Spotify Widget */
+.spotify-widget {
   padding-top: clamp(16px, 2.5vh, 22px);
   border-top: 1px solid var(--border);
   opacity: 0; transform: translateY(10px);
   transition: opacity .55s .38s, transform .55s .38s cubic-bezier(.22,1,.36,1);
 }
-.stats-row.in { opacity: 1; transform: none; }
-.stat { display: flex; flex-direction: column; gap: 3px; }
-.stat-val {
-  font-family: var(--display); font-weight: 800;
-  font-size: clamp(1.4rem, 3.5vw, 2.1rem);
-  color: #fff; letter-spacing: -.03em;
+.spotify-widget.in { opacity: 1; transform: none; }
+
+.playing-card {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: rgba(255,255,255,.015);
+  border: 1px solid var(--border); border-radius: 12px;
+  padding: 12px 16px 12px 12px; text-decoration: none;
+  transition: transform .2s cubic-bezier(.22,1,.36,1), border-color .2s, background .2s;
+  max-width: 100%;
 }
-.stat-label {
-  font-family: var(--mono);
-  font-size: clamp(.52rem, 1vw, .58rem);
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--faint);
+.playing-card:hover {
+  background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.12);
+  transform: translateY(-2px);
+}
+.album-art {
+  width: 44px; height: 44px; border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+.song-info {
+  display: flex; flex-direction: column; overflow: hidden;
+  white-space: nowrap; max-width: 200px;
+}
+.song-title {
+  font-size: .88rem; font-weight: 600; color: #fff;
+  text-overflow: ellipsis; overflow: hidden; line-height: 1.2;
+}
+.song-artist {
+  font-size: .75rem; color: var(--muted);
+  text-overflow: ellipsis; overflow: hidden; margin-top: 3px;
+}
+.not-playing {
+  font-family: var(--mono); font-size: .65rem; color: var(--faint);
+  letter-spacing: .05em; padding: 8px 0;
+}
+
+/* Playing Bars Animation */
+.playing-bars {
+  display: flex; gap: 3px; align-items: flex-end;
+  height: 14px; margin-left: 12px;
+}
+.bar {
+  width: 3px; background: #1ED760; border-radius: 2px;
+  animation: bounce 1.2s ease infinite alternate;
+}
+.bar:nth-child(2) { animation-delay: 0.2s; background: #22c55e; }
+.bar:nth-child(3) { animation-delay: 0.4s; background: #10b981; }
+
+@keyframes bounce {
+  10%  { height: 4px; }
+  50%  { height: 14px; }
+  90%  { height: 6px; }
+  100% { height: 6px; }
 }
 
 /* Mobile */
@@ -154,6 +217,6 @@ const stats = []
   .about-text p { font-size: .82rem; line-height: 1.6; }
   .tags { gap: 4px; }
   .tag { padding: 4px 9px; font-size: .52rem; }
-  .stats-row { padding-top: 12px; gap: 20px; }
+  .spotify-widget { padding-top: 12px; }
 }
 </style>

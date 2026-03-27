@@ -3,11 +3,10 @@
     <div class="inner">
 
       <header class="panel-header" :class="{ in: active }">
-        <span class="mono-label">05 / contact</span>
         <h2 class="panel-title">hit me up</h2>
       </header>
 
-      <form class="form" :class="{ in: active }" @submit.prevent="send">
+      <form v-if="!status || status.type !== 'success'" class="form" :class="{ in: active }" @submit.prevent="send">
         <div class="form-row">
           <label for="cf-name">Name</label>
           <input id="cf-name" v-model="form.name" type="text" placeholder="Your name" autocomplete="off" />
@@ -26,10 +25,18 @@
           <span v-else class="dots"><span/><span/><span/></span>
         </button>
 
-        <div v-if="status" :class="['status-msg', status.type]">
+        <div v-if="status && status.type === 'error'" :class="['status-msg', status.type]">
           {{ status.text }}
         </div>
       </form>
+
+      <!-- Full Success View -->
+      <div v-if="status && status.type === 'success'" class="success-view" :class="{ in: active }">
+        <div class="success-icon">✓</div>
+        <h3>Message Sent</h3>
+        <p>Thanks for reaching out! I'll get back to you soon.</p>
+        <button class="btn-reset" @click="resetForm">Send another</button>
+      </div>
 
     </div>
   </section>

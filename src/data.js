@@ -30,26 +30,11 @@ export const SOCIAL_GROUPS = [
       { id:'valorant',     label:'Valorant',      url:'https://tracker.gg/valorant/profile/riot/RynQrka',  color:'#FA4454' },
     ]
   },
-  {
-    key: 'adult',
-    label: 'Adult',
-    items: [
-      { id:'onlyfans',  label:'OnlyFans',  url:'https://onlyfans.com/rynqrka',  color:'#00AFF0' },
-      { id:'fansly',    label:'Fansly',    url:'https://fansly.com/rynqrka',    color:'#1da0f2' },
-      { id:'eporner',   label:'EPorner',   url:'https://eporner.com/profile/rynqrka', color:'#ff6600' },
-      { id:'xhamster',  label:'xHamster',  url:'https://xhamster.com/users/rynqrka',  color:'#f5821f' },
-      { id:'pornhub',   label:'Pornhub',   url:'https://pornhub.com/model/rynqrka',   color:'#ff9000' },
-      { id:'motherless',label:'Motherless',url:'https://motherless.com/m/rynqrka',    color:'#e0cbcb' },
-      { id:'spankbang', label:'SpankBang', url:'https://spankbang.com/profile/rynqrka', color:'#e8000d' },
-      { id:'stripchat', label:'Stripchat', url:'https://stripchat.com/rynqrka',  color:'#ff5f00' },
-      { id:'xvideos',   label:'XVideos',   url:'https://xvideos.com/profiles/rynqrka', color:'#cc0000' },
-    ]
-  },
 ]
 
 export const SOCIALS = SOCIAL_GROUPS.flatMap(g => g.items)
 
-export const SECTIONS = ['home','socials','blog','about','contact']
+export const SECTIONS = ['home','socials','projects','blog','about','contact']
 
 export const ABOUT_TAGS = [
   'tryna create smth', 'gaming a bit', 'maybe streaming', 'music always', 'rage baiting'
@@ -57,6 +42,7 @@ export const ABOUT_TAGS = [
 
 export const CONFIG = {
   mediumUsername: 'rynqrka',
+  githubUsername: 'rynqrka',
 }
 
 

@@ -10,6 +10,9 @@
     <!-- Subtle radial spotlight that follows sections -->
     <div class="spotlight" :style="spotlightStyle" aria-hidden="true"></div>
 
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" :class="{ hovering: isHovering, clicking: isClicking, hidden: isMobile }" ref="cursorRef"></div>
+
     <!-- Side nav dots -->
     <nav class="sidenav" aria-label="Page sections">
       <button
@@ -53,11 +56,12 @@
 
     <!-- Panels -->
     <div class="panels" ref="panels">
-      <SectionHome    :active="current === 0" @go="goTo" />
-      <SectionSocials :active="current === 1" />
-      <SectionBlog    :active="current === 2" />
-      <SectionAbout   :active="current === 3" />
-      <SectionContact :active="current === 4" />
+      <SectionHome     :active="current === 0" @go="goTo" />
+      <SectionSocials  :active="current === 1" />
+      <SectionProjects :active="current === 2" />
+      <SectionBlog     :active="current === 3" />
+      <SectionAbout    :active="current === 4" />
+      <SectionContact  :active="current === 5" />
     </div>
 
     <!-- Bottom progress bar -->
@@ -72,6 +76,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { SECTIONS } from './data.js'
 import SectionHome    from './components/SectionHome.vue'
 import SectionSocials from './components/SectionSocials.vue'
+import SectionProjects from './components/SectionProjects.vue'
 import SectionBlog    from './components/SectionBlog.vue'
 import SectionAbout   from './components/SectionAbout.vue'
 import SectionContact from './components/SectionContact.vue'
@@ -81,6 +86,9 @@ const current = ref(0)
 const locked  = ref(false)
 const isMobile = ref(false)
 
+const cursorRef = ref(null)
+const isHovering = ref(false)
+
 function checkMobile() { isMobile.value = window.innerWidth <= 640 }
 
 const progressPct = computed(() =>
@@ -88,7 +96,7 @@ const progressPct = computed(() =>
 )
 
 // Subtle section-tinted spotlight
-const spotlightColors = ['#1a1a2e','#0e0e1a','#0e1a1a','#1a1a0e','#1a0e1a']
+const spotlightColors = ['#1a1a2e','#0e0e1a','#1a1a2e','#0e1a1a','#1a1a0e','#1a0e1a']
 const spotlightStyle  = computed(() => ({
   background: `radial-gradient(ellipse 70% 70% at 50% 50%, ${spotlightColors[current.value]}, transparent 70%)`,
 }))
@@ -192,15 +200,75 @@ function onKey(e) {
   if (['ArrowUp','PageUp'].includes(e.key))     { e.preventDefault(); goTo(current.value - 1) }
 }
 
+// Custom Cursor Logic
+const isClicking = ref(false)
+
+function onMouseMove(e) {
+  if (isMobile.value || !cursorRef.value) return
+  requestAnimationFrame(() => {
+    if (cursorRef.value) {
+      cursorRef.value.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0)`
+    }
+    
+    // Magnetic pull logic
+    const magneticEl = e.target.closest('.magnetic')
+    if (magneticEl) {
+      const rect = magneticEl.getBoundingClientRect()
+      const centerX = rect.left + rect.width / 2
+      const centerY = rect.top + rect.height / 2
+      const pullX = (e.clientX - centerX) * 0.25 // 25% pull strength
+      const pullY = (e.clientY - centerY) * 0.25
+      magneticEl.style.transform = `translate(${pullX}px, ${pullY}px)`
+      magneticEl.style.transition = 'transform 0s' // Remove transform delay while tracking
+    }
+  })
+}
+
+function checkHover(e) {
+  if (isMobile.value) return
+  const target = e.target
+  const isInteractive = target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button') || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA'
+  isHovering.value = !!isInteractive
+}
+
+function resetMagnetic(e) {
+  const magneticEl = e.target.closest('.magnetic')
+  if (magneticEl) {
+    magneticEl.style.transform = `translate(0px, 0px)`
+    magneticEl.style.transition = 'transform 0.4s cubic-bezier(0.22, 1, 0.36, 1)' // Spring back
+    
+    // Clean up inline style after spring back completes so CSS hover takes over again
+    setTimeout(() => {
+      if (!magneticEl.matches(':hover')) {
+        magneticEl.style.transform = ''
+        magneticEl.style.transition = ''
+      }
+    }, 400)
+  }
+}
+
+function onMouseDown() { if (!isMobile.value) isClicking.value = true }
+function onMouseUp()   { if (!isMobile.value) isClicking.value = false }
+
 onMounted(() => {
   panels.value.style.transition = 'transform 0.88s cubic-bezier(0.76, 0, 0.24, 1)'
   window.addEventListener('keydown', onKey)
   window.addEventListener('resize', checkMobile)
+  window.addEventListener('mousemove', onMouseMove, { passive: true })
+  window.addEventListener('mouseover', checkHover, { passive: true })
+  window.addEventListener('mouseout', resetMagnetic, { passive: true })
+  window.addEventListener('mousedown', onMouseDown, { passive: true })
+  window.addEventListener('mouseup', onMouseUp, { passive: true })
   checkMobile()
 })
 onUnmounted(() => {
   window.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', checkMobile)
+  window.removeEventListener('mousemove', onMouseMove)
+  window.removeEventListener('mouseover', checkHover)
+  window.removeEventListener('mouseout', resetMagnetic)
+  window.removeEventListener('mousedown', onMouseDown)
+  window.removeEventListener('mouseup', onMouseUp)
 })
 </script>
 
@@ -216,6 +284,35 @@ onUnmounted(() => {
   position: fixed; inset: 0;
   pointer-events: none; z-index: 0;
   transition: background 1.2s ease;
+}
+
+/* Custom Cursor */
+.custom-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 14px; height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: exclusion;
+  will-change: transform;
+  transform: translate3d(-100px, -100px, 0); /* Start hidden offscreen */
+  margin: -7px 0 0 -7px; /* Center dot on true cursor coord */
+  transition: width 0.2s cubic-bezier(0.22, 1, 0.36, 1), height 0.2s cubic-bezier(0.22, 1, 0.36, 1), margin 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.custom-cursor.hovering {
+  width: 44px; height: 44px;
+  margin: -22px 0 0 -22px;
+  background: rgba(255, 255, 255, 0.8);
+}
+.custom-cursor.clicking {
+  width: 32px; height: 32px;
+  margin: -16px 0 0 -16px;
+  background: rgba(255, 255, 255, 0.95);
+}
+.custom-cursor.hidden {
+  display: none !important;
 }
 
 /* Panels track */

@@ -3,7 +3,6 @@
     <div class="inner">
 
       <header class="panel-header" :class="{ in: active }">
-        <span class="mono-label">03 / blog</span>
         <h2 class="panel-title">random thoughts</h2>
       </header>
 
@@ -35,7 +34,7 @@
             <div class="post-meta">
               <span>{{ formatDate(post.pubDate) }}</span>
               <span class="dot">·</span>
-              <span>{{ readTime(post.description) }} min read</span>
+              <span>{{ post.readTime }}</span>
             </div>
           </div>
           <div class="post-arrow">
@@ -80,12 +79,11 @@ watch(() => props.active, (val) => {
 
 async function fetchPosts() {
   try {
-    const rss = `https://medium.com/feed/@${CONFIG.mediumUsername}`
-    const api = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}&count=6`
-    const res  = await fetch(api)
+    const res  = await fetch(`/api/blog?username=${CONFIG.mediumUsername}`)
+    if (!res.ok) throw new Error()
     const data = await res.json()
-    if (!data.items?.length) throw new Error()
-    posts.value = data.items.slice(0, 6)
+    if (!data?.length) throw new Error()
+    posts.value = data
   } catch {
     error.value = true
   } finally {

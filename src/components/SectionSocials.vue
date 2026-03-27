@@ -3,7 +3,6 @@
     <div class="inner">
 
       <header class="panel-header" :class="{ in: active }">
-        <span class="mono-label">02 / socials</span>
         <h2 class="panel-title">Find me online</h2>
       </header>
 
@@ -52,7 +51,7 @@
 import { SOCIAL_GROUPS, LOGO_SRCS } from '../data.js'
 defineProps({ active: Boolean })
 // Platforms whose brand color is dark/black — keep white even on hover
-const darkBrand = new Set(['x', 'tiktok', 'threads', 'steam', '9gag', 'motherless'])
+const darkBrand = new Set(['x', 'tiktok', 'threads', 'steam', '9gag'])
 </script>
 
 <style scoped>
