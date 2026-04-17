@@ -25,6 +25,8 @@
           target="_blank"
           rel="noopener noreferrer"
           class="project-card"
+          :aria-label="`View source code for ${repo.name}`"
+          data-tooltip="View Source Code"
           :class="{ in: active }"
           :style="{ '--delay': `${0.1 + i * 0.08}s` }"
         >
@@ -50,6 +52,7 @@
         :href="githubUrl"
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="View all projects on GitHub"
         class="view-all"
         :class="{ in: active }"
       >
@@ -195,7 +198,7 @@ async function fetchRepos() {
 .repo-desc {
   font-size: clamp(.82rem, 1.5vw, .9rem); color: var(--muted);
   line-height: 1.5; flex: 1;
-  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
 }
 
 .repo-meta {

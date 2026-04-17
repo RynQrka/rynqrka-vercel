@@ -28,19 +28,23 @@
 
       <!-- Spotify Widget -->
       <div v-if="song" class="spotify-widget" :class="{ in: active }">
-        <span class="section-sub">currently listening</span>
-        <a v-if="song.isPlaying" :href="song.songUrl" target="_blank" rel="noopener noreferrer" class="playing-card">
-          <img :src="song.albumImageUrl" class="album-art" alt="Album Cover" />
+        <span class="section-sub">What I’m playing</span>
+        <a v-if="song.title" :href="song.songUrl" target="_blank" rel="noopener noreferrer" class="playing-card premium-card">
+          <div class="album-wrapper">
+            <img :src="song.albumImageUrl" class="album-art" alt="Album Cover" />
+            <div class="album-glow" :style="{ backgroundImage: `url(${song.albumImageUrl})` }"></div>
+          </div>
           <div class="song-info">
             <div class="song-title">{{ song.title }}</div>
             <div class="song-artist">{{ song.artist }}</div>
+            <div v-if="!song.isPlaying" class="last-played">{{ song.lastPlayedText }}</div>
           </div>
-          <div class="playing-bars">
+          <div v-if="song.isPlaying" class="playing-bars">
             <span class="bar"></span><span class="bar"></span><span class="bar"></span>
           </div>
         </a>
         <div v-else class="not-playing">
-          <span>Not playing anything online right now.</span>
+          <span>Nothing at the moment.</span>
         </div>
       </div>
 
@@ -144,33 +148,54 @@ watch(() => props.active, (val) => {
 }
 .spotify-widget.in { opacity: 1; transform: none; }
 
-.playing-card {
-  display: inline-flex; align-items: center; gap: 14px;
-  background: rgba(255,255,255,.015);
-  border: 1px solid var(--border); border-radius: 12px;
-  padding: 12px 16px 12px 12px; text-decoration: none;
-  transition: transform .2s cubic-bezier(.22,1,.36,1), border-color .2s, background .2s;
-  max-width: 100%;
+.premium-card {
+  display: inline-flex; align-items: center; gap: 16px;
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px; padding: 14px 20px 14px 14px;
+  text-decoration: none; max-width: 100%;
+  transition: transform .3s cubic-bezier(.22,1,.36,1), border-color .3s, background .3s, box-shadow .3s;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.1);
 }
-.playing-card:hover {
-  background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.12);
-  transform: translateY(-2px);
+.premium-card:hover {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+
+.album-wrapper {
+  position: relative;
+  width: 52px; height: 52px;
+  flex-shrink: 0;
 }
 .album-art {
-  width: 44px; height: 44px; border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  width: 100%; height: 100%; border-radius: 8px;
+  object-fit: cover; position: relative; z-index: 2;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
+.album-glow {
+  position: absolute; top: 10%; left: 10%; width: 80%; height: 80%;
+  background-size: cover; background-position: center;
+  filter: blur(14px) saturate(1.5); opacity: 0.6; z-index: 1;
+}
+
 .song-info {
   display: flex; flex-direction: column; overflow: hidden;
-  white-space: nowrap; max-width: 200px;
+  white-space: nowrap; max-width: 200px; justify-content: center;
 }
 .song-title {
-  font-size: .88rem; font-weight: 600; color: #fff;
-  text-overflow: ellipsis; overflow: hidden; line-height: 1.2;
+  font-size: .95rem; font-weight: 600; color: #fff;
+  text-overflow: ellipsis; overflow: hidden; line-height: 1.25;
 }
 .song-artist {
   font-size: .75rem; color: var(--muted);
   text-overflow: ellipsis; overflow: hidden; margin-top: 3px;
+}
+.last-played {
+  font-family: var(--mono); font-size: 0.6rem; color: var(--faint);
+  margin-top: 4px; letter-spacing: 0.05em;
 }
 .not-playing {
   font-family: var(--mono); font-size: .65rem; color: var(--faint);

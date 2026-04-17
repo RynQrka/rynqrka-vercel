@@ -11,7 +11,11 @@
     <div class="spotlight" :style="spotlightStyle" aria-hidden="true"></div>
 
     <!-- Custom Cursor -->
-    <div class="custom-cursor" :class="{ hovering: isHovering, clicking: isClicking, hidden: isMobile }" ref="cursorRef"></div>
+    <div class="custom-cursor" :class="{ hovering: isHovering, clicking: isClicking, hasTooltip: !!tooltipText, hidden: isMobile }" ref="cursorRef">
+      <Transition name="fade">
+        <span v-if="tooltipText" class="cursor-tip">{{ tooltipText }}</span>
+      </Transition>
+    </div>
 
     <!-- Side nav dots -->
     <nav class="sidenav" aria-label="Page sections">
@@ -88,6 +92,8 @@ const isMobile = ref(false)
 
 const cursorRef = ref(null)
 const isHovering = ref(false)
+const tooltipText = ref('')
+const isClicking = ref(false)
 
 function checkMobile() { isMobile.value = window.innerWidth <= 640 }
 
@@ -200,9 +206,6 @@ function onKey(e) {
   if (['ArrowUp','PageUp'].includes(e.key))     { e.preventDefault(); goTo(current.value - 1) }
 }
 
-// Custom Cursor Logic
-const isClicking = ref(false)
-
 function onMouseMove(e) {
   if (isMobile.value || !cursorRef.value) return
   requestAnimationFrame(() => {
@@ -229,6 +232,13 @@ function checkHover(e) {
   const target = e.target
   const isInteractive = target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('a') || target.closest('button') || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA'
   isHovering.value = !!isInteractive
+
+  const tooltipEl = target.closest('[data-tooltip]')
+  if (tooltipEl) {
+    tooltipText.value = tooltipEl.getAttribute('data-tooltip')
+  } else {
+    tooltipText.value = ''
+  }
 }
 
 function resetMagnetic(e) {
@@ -314,6 +324,21 @@ onUnmounted(() => {
 .custom-cursor.hidden {
   display: none !important;
 }
+
+/* Cursor Tooltip */
+.cursor-tip {
+  position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+  margin-left: 14px; background: rgba(0,0,0,0.85); color: #fff;
+  padding: 5px 10px; border-radius: 6px; font-size: 0.65rem;
+  font-family: var(--mono); letter-spacing: 0.05em;
+  white-space: nowrap; mix-blend-mode: normal;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+.custom-cursor.hasTooltip { mix-blend-mode: normal; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.4); }
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s, transform 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(-50%) translateX(-4px); }
 
 /* Panels track */
 .panels {

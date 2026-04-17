@@ -4,6 +4,7 @@ const refresh_token = process.env.SPOTIFY_REFRESH_TOKEN
 
 const basic = Buffer.from(`${client_id}:${client_secret}`).toString('base64')
 const NOW_PLAYING_ENDPOINT = `https://api.spotify.com/v1/me/player/currently-playing`
+const RECENTLY_PLAYED_ENDPOINT = `https://api.spotify.com/v1/me/player/recently-played?limit=1`
 const TOKEN_ENDPOINT = `https://accounts.spotify.com/api/token`
 
 let cachedAccessToken = null
@@ -32,8 +33,20 @@ async function getAccessToken() {
   return cachedAccessToken
 }
 
+function timeAgo(dateString) {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMins = Math.max(1, Math.floor(diffMs / 60000))
+  
+  if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`
+  const diffHours = Math.floor(diffMins / 60)
+  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+  const diffDays = Math.floor(diffHours / 24)
+  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+}
+
 export default async function handler(req, res) {
-  // If user hasn't configured Spotify env vars yet, gracefully mock or fail
   if (!refresh_token || !client_id || !client_secret) {
     return res.status(200).json({ isPlaying: false, message: 'Spotify not configured natively yet' })
   }
@@ -44,21 +57,42 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${token}` },
     })
 
-    if (response.status === 204 || response.status > 400) {
+    let isPlaying = false
+    let songItem = null
+    let playedAt = null
+
+    if (response.status !== 204 && response.status < 400) {
+      const songData = await response.json()
+      if (songData.item && songData.is_playing) {
+        isPlaying = true
+        songItem = songData.item
+      }
+    }
+
+    if (!isPlaying) {
+      // Fetch recently played
+      const recentRes = await fetch(RECENTLY_PLAYED_ENDPOINT, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (recentRes.ok) {
+        const recentData = await recentRes.json()
+        if (recentData.items && recentData.items.length > 0) {
+          songItem = recentData.items[0].track
+          playedAt = recentData.items[0].played_at
+        }
+      }
+    }
+
+    if (!songItem) {
       return res.status(200).json({ isPlaying: false })
     }
 
-    const song = await response.json()
-    if (!song.item) {
-      return res.status(200).json({ isPlaying: false })
-    }
-
-    const isPlaying = song.is_playing
-    const title = song.item.name
-    const artist = song.item.artists.map((_artist) => _artist.name).join(', ')
-    const album = song.item.album.name
-    const albumImageUrl = song.item.album.images[0].url
-    const songUrl = song.item.external_urls.spotify
+    const title = songItem.name
+    const artist = songItem.artists.map((a) => a.name).join(', ')
+    const album = songItem.album.name
+    const albumImageUrl = songItem.album.images[0].url
+    const songUrl = songItem.external_urls.spotify
+    const lastPlayedText = playedAt ? `was listening ${timeAgo(playedAt)}` : null
 
     res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=15')
     return res.status(200).json({
@@ -68,6 +102,7 @@ export default async function handler(req, res) {
       album,
       albumImageUrl,
       songUrl,
+      lastPlayedText
     })
   } catch (error) {
     console.error('Error fetching Spotify:', error)

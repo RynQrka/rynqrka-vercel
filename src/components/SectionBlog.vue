@@ -51,6 +51,7 @@
         :href="mediumUrl"
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="View all posts on Medium"
         class="view-all"
         :class="{ in: active }"
       >
@@ -93,9 +94,6 @@ async function fetchPosts() {
 
 function formatDate(str) {
   return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-}
-function readTime(html) {
-  return Math.max(1, Math.round((html || '').replace(/<[^>]+>/g, '').split(' ').length / 200))
 }
 </script>
 

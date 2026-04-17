@@ -41,8 +41,8 @@ export const ABOUT_TAGS = [
 ]
 
 export const CONFIG = {
-  mediumUsername: 'rynqrka',
-  githubUsername: 'rynqrka',
+  mediumUsername: import.meta.env.VITE_MEDIUM_USERNAME || 'rynqrka',
+  githubUsername: import.meta.env.VITE_GITHUB_USERNAME || 'rynqrka',
 }
 
 

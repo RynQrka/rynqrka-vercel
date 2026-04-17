@@ -25,6 +25,7 @@
               target="_blank"
               rel="noopener noreferrer"
               class="card"
+              :aria-label="s.label"
               :class="{ in: active, dark: darkBrand.has(s.id) }"
               :style="{
                 '--color': s.color,

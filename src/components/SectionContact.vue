@@ -7,17 +7,17 @@
       </header>
 
       <form v-if="!status || status.type !== 'success'" class="form" :class="{ in: active }" @submit.prevent="send">
-        <div class="form-row">
+        <div class="form-row floating">
+          <input id="cf-name" v-model="form.name" type="text" placeholder=" " autocomplete="off" />
           <label for="cf-name">Name</label>
-          <input id="cf-name" v-model="form.name" type="text" placeholder="Your name" autocomplete="off" />
         </div>
-        <div class="form-row">
+        <div class="form-row floating">
+          <input id="cf-email" v-model="form.email" type="email" placeholder=" " autocomplete="off" />
           <label for="cf-email">Email</label>
-          <input id="cf-email" v-model="form.email" type="email" placeholder="your@email.com" autocomplete="off" />
         </div>
-        <div class="form-row">
+        <div class="form-row floating">
+          <textarea id="cf-msg" v-model="form.message" placeholder=" " rows="4"></textarea>
           <label for="cf-msg">Message</label>
-          <textarea id="cf-msg" v-model="form.message" placeholder="What's on your mind?" rows="4"></textarea>
         </div>
 
         <button type="submit" class="btn-send" :disabled="sending">
@@ -77,6 +77,11 @@ async function send() {
   }
   sending.value = false
 }
+
+function resetForm() {
+  status.value = null
+  Object.assign(form, { name: '', email: '', message: '' })
+}
 </script>
 
 <style scoped>
@@ -120,27 +125,28 @@ async function send() {
 }
 .form.in { opacity: 1; transform: none; }
 
-.form-row { display: flex; flex-direction: column; gap: 6px; }
+.form-row { position: relative; margin-top: 8px; }
 .form-row label {
-  font-family: var(--mono);
-  font-size: clamp(.54rem, 1vw, .6rem);
-  letter-spacing: .15em; text-transform: uppercase;
-  color: var(--faint);
+  position: absolute; left: 14px; top: 12px;
+  pointer-events: none; background: transparent; padding: 0 4px; border-radius: 4px;
+  font-family: var(--mono); font-size: clamp(.65rem, 1.2vw, .75rem);
+  letter-spacing: .08em; text-transform: uppercase; color: var(--faint);
+  transition: all .2s cubic-bezier(.22,1,.36,1);
 }
 .form-row input,
 .form-row textarea {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: clamp(9px, 1.5vh, 12px) 14px;
-  color: var(--text);
-  font-size: clamp(.82rem, 1.6vw, .9rem);
-  outline: none; resize: none;
-  transition: border-color .18s;
-  width: 100%;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: clamp(12px, 2vh, 16px) 14px; color: var(--text);
+  font-size: clamp(.82rem, 1.6vw, .9rem); outline: none; resize: none;
+  transition: border-color .18s; width: 100%;
 }
-.form-row input::placeholder,
-.form-row textarea::placeholder { color: rgba(255,255,255,.14); }
+.form-row input:focus + label,
+.form-row input:not(:placeholder-shown) + label,
+.form-row textarea:focus + label,
+.form-row textarea:not(:placeholder-shown) + label {
+  top: -8px; left: 10px; font-size: .55rem;
+  background: var(--bg); color: #fff; letter-spacing: .15em;
+}
 .form-row input:focus,
 .form-row textarea:focus { border-color: rgba(255,255,255,.2); }
 
