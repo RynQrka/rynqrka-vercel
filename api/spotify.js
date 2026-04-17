@@ -42,8 +42,10 @@ function timeAgo(dateString) {
   if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`
   const diffHours = Math.floor(diffMins / 60)
   if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
-  const diffDays = Math.floor(diffHours / 24)
-  return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+  
+  const options = { month: 'short', day: 'numeric' }
+  if (date.getFullYear() !== now.getFullYear()) options.year = 'numeric'
+  return `on ${date.toLocaleDateString('en-US', options)}`
 }
 
 export default async function handler(req, res) {
